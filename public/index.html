@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tienda</title>
+<link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+<h1>🛒 Tienda Online</h1>
+
+<div class="grid" id="productos"></div>
+
+<h2>🧾 Carrito</h2>
+<div id="carrito"></div>
+
+<h3 id="total">Total: S/ 0.00</h3>
+
+<button onclick="comprar()" class="btn-comprar" id="btnComprar">
+🛍 Confirmar compra
+</button>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+let carrito = [];
+
+// 💰 formato moneda
+function formatoSoles(valor) {
+    return `S/ ${Number(valor).toFixed(2)}`;
+}
+
+// 📦 cargar productos
+fetch('/api/productos')
+.then(res => res.json())
+.then(data => {
+
+    const contenedor = document.getElementById('productos');
+    contenedor.innerHTML = "";
+
+    data.forEach(p => {
+        contenedor.innerHTML += `
+        <div class="card">
+            <h3>${p.nombre}</h3>
+            <p>${p.descripcion}</p>
+            <p>${formatoSoles(p.precio)}</p>
+            <p>Stock: ${p.stock}</p>
+
+            <button onclick="agregar(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${p.precio}, ${p.stock})">
+                Agregar 🛒
+            </button>
+
+            <button onclick="agregarStock(${p.id})">
+                ➕ Agregar stock
+            </button>
+
+        </div>
+        `;
+    });
+});
+
+// 🛒 agregar producto
+function agregar(id, nombre, precio, stock) {
+
+    let item = carrito.find(p => p.id === id);
+
+    if (item) {
+        if (item.cantidad < stock) {
+            item.cantidad++;
+        } else {
+            mostrarToast(false, "Stock máximo alcanzado");
+        }
+    } else {
+        carrito.push({ id, nombre, precio, cantidad: 1 });
+    }
+
+    render();
+}
+
+// ❌ quitar producto
+function quitar(id) {
+    carrito = carrito.filter(p => p.id !== id);
+    render();
+}
+
+// 🧾 render carrito
+function render() {
+
+    let div = document.getElementById('carrito');
+    let total = 0;
+
+    div.innerHTML = "";
+
+    carrito.forEach(p => {
+
+        let subtotal = p.precio * p.cantidad;
+        total += subtotal;
+
+        div.innerHTML += `
+            <p>
+                ${p.nombre} x ${p.cantidad} = ${formatoSoles(subtotal)}
+                <button onclick="quitar(${p.id})">❌</button>
+            </p>
+        `;
+    });
+
+    document.getElementById('total').innerText =
+        "Total: " + formatoSoles(total);
+}
+
+// 🔥 calcular total seguro
+function calcularTotal() {
+    return carrito.reduce((acc, p) => acc + (Number(p.precio) * Number(p.cantidad)), 0);
+}
+
+// 🛍 comprar
+async function comprar() {
+
+    if (carrito.length === 0) {
+        mostrarToast(false, "Carrito vacío");
+        return;
+    }
+
+    let btn = document.getElementById('btnComprar');
+    btn.disabled = true;
+    btn.innerText = "Procesando... ⏳";
+
+    try {
+
+        const res = await fetch('/api/compra', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                carrito,
+                total: calcularTotal()
+            })
+        });
+
+        const data = await res.json();
+
+        console.log("📩 RESPUESTA:", data);
+
+        if (!res.ok || !data.success) {
+            throw new Error(data.message || "Error en compra");
+        }
+
+        mostrarToast(true, data.message);
+
+        carrito = [];
+        render();
+        cargarProductos();
+
+    } catch (error) {
+
+        mostrarToast(false, error.message);
+
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "🛍 Confirmar compra";
+    }
+}
+
+// 🔄 recargar productos
+function cargarProductos() {
+
+    fetch('/api/productos')
+    .then(res => res.json())
+    .then(data => {
+
+        const contenedor = document.getElementById('productos');
+        contenedor.innerHTML = "";
+
+        data.forEach(p => {
+            contenedor.innerHTML += `
+            <div class="card">
+                <h3>${p.nombre}</h3>
+                <p>${p.descripcion}</p>
+                <p>S/ ${p.precio}</p>
+                <p>Stock: ${p.stock}</p>
+
+                <button onclick="agregar(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${p.precio}, ${p.stock})">
+                    Agregar 🛒
+                </button>
+
+                <button onclick="agregarStock(${p.id})">
+                    ➕ Agregar stock
+                </button>
+
+            </div>
+            `;
+        });
+
+    });
+}
+
+// ➕ agregar stock
+async function agregarStock(id) {
+
+    const cantidad = prompt("¿Cuánto stock deseas agregar?");
+
+    if (!cantidad || isNaN(cantidad)) {
+        alert("Cantidad inválida");
+        return;
+    }
+
+    try {
+
+        const res = await fetch('/api/productos/stock', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id,
+                cantidad
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.message);
+        }
+
+        alert("Stock actualizado ✔");
+
+        cargarProductos();
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
+// 🔔 toast
+function mostrarToast(success, message) {
+
+    let toast = document.getElementById('toast');
+
+    toast.innerHTML = `
+        <strong>${success ? "✅ Éxito" : "❌ Error"}</strong><br>
+        ${message}
+    `;
+
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+</script>
+
+</body>
+</html>

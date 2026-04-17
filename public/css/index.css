@@ -1,0 +1,118 @@
+/* 🌑 Fondo elegante */
+body {
+  font-family: 'Arial', sans-serif;
+  background: #0a0a0a;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+}
+
+/* 🏷️ Título */
+h1 {
+  margin: 20px;
+  font-size: 32px;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+h2 {
+  color: #cccccc;
+}
+
+/* 📦 Grid productos */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* 🧾 Cards estilo premium */
+.card {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #ffffff;
+}
+
+/* 🧠 Textos dentro */
+.card h3 {
+  color: #ffffff;
+}
+
+.card p {
+  color: #bbbbbb;
+}
+
+/* 🔘 Botones */
+button {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 10px 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #dddddd;
+}
+
+/* 🟢 Botón comprar */
+.btn-comprar {
+  background: #ffffff;
+  color: #000000;
+  padding: 15px;
+  margin: 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-comprar:hover {
+  background: #e5e5e5;
+}
+
+/* 🛒 Carrito */
+#carrito {
+  background: #111111;
+  border-top: 1px solid #333;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 12px;
+}
+
+/* 💰 Total */
+#total {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+/* 🔔 Toast moderno */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: -320px;
+  background: #ffffff;
+  color: #000000;
+  padding: 15px;
+  border-radius: 12px;
+  transition: 0.4s;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  font-weight: bold;
+}
+
+.toast.show {
+  right: 20px;
+}
