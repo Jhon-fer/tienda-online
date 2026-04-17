@@ -8,7 +8,7 @@
 
 <body>
 
-<h1>🛒 Tienda Online</h1>
+<h1>🛒 Tienda de computaduras Gandhi</h1>
 
 <div class="grid" id="productos"></div>
 
@@ -70,7 +70,7 @@ function agregar(id, nombre, precio, stock) {
         if (item.cantidad < stock) {
             item.cantidad++;
         } else {
-            mostrarToast(false, "Stock máximo alcanzado");
+            mostrarToast(false, "Maxima capacidad de stock alacanzado");
         }
     } else {
         carrito.push({ id, nombre, precio, cantidad: 1 });
